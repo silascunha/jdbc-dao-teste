@@ -23,48 +23,83 @@ public class SellerDaoJDBC implements SellerDAO {
     @Override
     public void insert(Seller obj) {
         PreparedStatement st = null;
-         try {
-             st = conn.prepareStatement(
-                     "INSERT INTO seller " +
-                             "(Name, Email, BirthDate, BaseSalary, DepartmentId) " +
-                             "VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS
-                            );
+        try {
+            st = conn.prepareStatement(
+                    "INSERT INTO seller " +
+                            "(Name, Email, BirthDate, BaseSalary, DepartmentId) " +
+                            "VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS
+            );
 
-             st.setString(1, obj.getName());
-             st.setString(2, obj.getEmail());
-             st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
-             st.setDouble(4, obj.getBaseSalary());
-             st.setInt(5, obj.getDepartment().getId());
+            st.setString(1, obj.getName());
+            st.setString(2, obj.getEmail());
+            st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+            st.setDouble(4, obj.getBaseSalary());
+            st.setInt(5, obj.getDepartment().getId());
 
-             int rowsAffected = st.executeUpdate();
+            int rowsAffected = st.executeUpdate();
 
-             if (rowsAffected > 0) {
-                 ResultSet rs = st.getGeneratedKeys();
-                 if (rs.next()) {
-                     int id = rs.getInt(1);
-                     obj.setId(id);
-                 }
-                 DB.closeResultSet(rs);
-             }
-             else {
-                 throw new DBException("Erro inesperado, nenhuma linha foi afetada.");
-             }
+            if (rowsAffected > 0) {
+                ResultSet rs = st.getGeneratedKeys();
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    obj.setId(id);
+                }
+                DB.closeResultSet(rs);
+            } else {
+                throw new DBException("Erro inesperado, nenhuma linha foi afetada.");
+            }
 
-         } catch (SQLException e) {
-             throw new DBException(e.getMessage());
-         } finally {
-             DB.closeStatement(st);
-         }
+        } catch (SQLException e) {
+            throw new DBException(e.getMessage());
+        } finally {
+            DB.closeStatement(st);
+        }
     }
 
     @Override
     public void update(Seller obj) {
+        PreparedStatement st = null;
+        try {
+            st = conn.prepareStatement(
+                    "UPDATE seller " +
+                            "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? " +
+                            "WHERE Id = ?"
+            );
+            //Parâmetros do SET
+            st.setString(1, obj.getName());
+            st.setString(2, obj.getEmail());
+            st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+            st.setDouble(4, obj.getBaseSalary());
+            st.setInt(5, obj.getDepartment().getId());
 
+            //Parâmetro do WHERE Id = ?
+            st.setInt(6, obj.getId());
+
+            //É o que executa de fato a ação no banco de dados
+            st.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new DBException(e.getMessage());
+        } finally {
+            DB.closeStatement(st);
+        }
     }
 
     @Override
     public void deleteById(Integer id) {
+        PreparedStatement st = null;
+        try {
+            st = conn.prepareStatement("DELETE FROM seller WHERE Id = ?");
 
+            st.setInt(1, id);
+
+            st.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new DBException(e.getMessage());
+        } finally {
+            DB.closeStatement(st);
+        }
     }
 
     @Override
@@ -155,7 +190,7 @@ public class SellerDaoJDBC implements SellerDAO {
 
             List<Seller> list = new ArrayList<>();
 
-            while(rs.next()) {
+            while (rs.next()) {
                 //utiliza a instância do Department do argumento para que não seja criado um novo Department
                 Seller obj = instantiateSeller(rs, department);
                 list.add(obj);
@@ -183,10 +218,10 @@ public class SellerDaoJDBC implements SellerDAO {
     }
 
     private Department instantiateDepartment(ResultSet rs) throws SQLException {
-        Department dep = new Department();
-        dep.setId(rs.getInt("DepartmentId"));
-        dep.setName(rs.getString("DepName"));
+        Department obj = new Department();
+        obj.setId(rs.getInt("DepartmentId"));
+        obj.setName(rs.getString("DepName"));
 
-        return dep;
+        return obj;
     }
 }
