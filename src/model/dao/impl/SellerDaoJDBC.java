@@ -85,7 +85,7 @@ public class SellerDaoJDBC implements SellerDAO {
             //Estrutura Map para que não se repita uma nova instância do mesmo Objeto Department
             Map<Integer, Department> map = new HashMap<>();
 
-            if (rs.next()) {
+            while (rs.next()) {
                 //retorna null se não houver um Department com o Id encontrado
                 //ou retorna a mesma instância de um Department já existente de um determinado Id
                 Department dep = map.get(rs.getInt("DepartmentId"));

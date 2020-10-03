@@ -19,10 +19,13 @@ public class Program {
         System.out.println("====TESTE: seller findById====");
         Seller seller = sellerDAO.findById(8);
         System.out.println(seller);
-        System.out.println();
 
-        System.out.println("====TESTE: seller findByDepartment====");
+        System.out.println("\n====TESTE: seller findByDepartment====");
         List<Seller> list = sellerDAO.findByDepartment(DaoFactory.createDepartmentDao().findById(1));
+        list.forEach(System.out::println);
+
+        System.out.println("\n====TESTE: seller findAll====");
+        list = sellerDAO.findAll();
         list.forEach(System.out::println);
 
     }
